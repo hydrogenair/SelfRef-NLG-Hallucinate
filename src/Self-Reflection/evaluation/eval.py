@@ -107,7 +107,7 @@ def main(input_file: str):
                     "reference_answer": ref_answer
                 }
                 
-                # 检测 initial_para 的幻觉
+                
                 if entry["initial_answer"] != "[Blocked]":
                     initial_result = detect_hallucination(
                         client, 
@@ -119,7 +119,7 @@ def main(input_file: str):
                         total_initial_hallucination_count += 1
                     result_entry["initial_eval"] = initial_result
                 
-                # 检测 final_para 的幻觉
+                
                 if entry["final_answer"] != "[Blocked]":
                     final_result = detect_hallucination(
                         client,

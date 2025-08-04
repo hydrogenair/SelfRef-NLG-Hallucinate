@@ -154,7 +154,4 @@ def main(input_file: str, output_file: str):
 
 
 if __name__ == "__main__":
-    main(
-        "/Users/xunlv/Documents/code/reflection/data/nil/test/data/para_sampled_300.jsonl",
-        "/Users/xunlv/Documents/code/reflection/data/nil/test/results/para/llama/para_llama_binary_300.jsonl"
-    )
+    main()

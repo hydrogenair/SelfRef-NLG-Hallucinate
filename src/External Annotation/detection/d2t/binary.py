@@ -11,14 +11,14 @@ class ContentSafetyError(Exception):
 
 def create_qwen_client():
     return OpenAI(
-        api_key="sk-680f6b091bae498083b2b1da449019c6",
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        api_key="",
+        base_url="",
     )
 
 def create_deepseek_client():
     return OpenAI(
-        api_key="sk-zk267c3f794bd6c34bbf3b8613ce16aa54667dfb4ea1447a",
-        base_url="https://api.zhizengzeng.com/v1",
+        api_key="",
+        base_url="",
     )
 
 def call_qwen_api(client: OpenAI, prompt: str) -> Optional[str]:
