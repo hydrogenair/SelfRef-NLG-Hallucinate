@@ -1,108 +1,77 @@
-## Overview
+# SelfRef‑NLG‑Hallucinate
 
-​	Hallucination remains a critical challenge in the era of Large Language Models (LLMs). Recent studies have proposed self-reflection as a promising strategy to mitigate hallucinations, based on the assumption that models can detect and correct their errors. While this approach has shown remarkable success in question-answering systems, its effectiveness in classic Natural Language Generation (NLG) tasks remains unclear. In this study, we conduct an empirical investigation into the effectiveness of self-reflection across three representative NLG tasks: summarisation, paraphrasing, and data-to-text generation. We explore a broad spectrum of strategies for instructing LLMs to detect their hallucinations, ranging from coarse-grained to fine-grained detection methods. Surprisingly, regardless of the granularity of the detection approach, self-reflection consistently performs poorly in mitigating hallucinations across all three NLG tasks. A closer examination reveals that LLMs demonstrate a limited ability to accurately identify their own mistakes during self-reflection. As a result, they often retrieve insufficient or incorrect evidence for subsequent corrections. Based on this observation, we also find that reflection can be effective only when a significantly stronger LLM is used to assist a weaker LLM in detecting hallucinations—a solution that is arguably impractical in real-world applications.
+> Code for paper **Self‑Reflection Often Fails to Address Hallucination in Classical Natural Language Generation Tasks: An Empirical Study**
 
-​	This project focuses on addressing hallucination issues in three key natural language generation (NLG) tasks: **Data to Text (D2T)**, **Paraphrasing**, and **Summarization**. It provides a framework to generate initial outputs, detect hallucinated content (inaccuracies or unsupported information), and regenerate corrected versions using state-of-the-art language models.
+This repository contains the code for our empirical investigation of **self‑reflection for hallucination mitigation** on three classical NLG tasks: **summarisation, paraphrasing, and data‑to‑text generation**\.
 
-## Supported Tasks
+We evaluate **eight hallucination‑detection strategies** spanning coarse‑binary judgment, category annotation, error localisation, scoring, and free‑form feedback, across multiple open‑source and frontier LLMs\. Our experiments show that self‑reflection only yields a limited, inconsistent reduction of hallucination; the primary bottleneck is models' poor self‑diagnosis ability\. Iterative self‑reflection brings negligible further gains\. Using a stronger external annotator can improve factual consistency but weakens the lightweight appeal of self‑reflection\.
 
-The project targets three core NLG tasks, as defined in `data/selected_tasks.txt`:
+> 📄 Paper: Self‑Reflection Often Fails to Address Hallucination in Classical Natural Language Generation Tasks: An Empirical Study
+> 🔗 Code repository: [https://github\.com/xxx/SelfRef](https://github.com/xxx/SelfRef)‑NLG‑Hallucinate
 
-1. **Data to Text (D2T)**: Converting structured data into coherent natural language descriptions.
-2. **Paraphrasing**: Rewriting text while preserving its original meaning.
-3. **Summarization**: Generating concise summaries of longer texts.
+## Directory layout
 
-## Directory Structure
-
-```plaintext
-Self-Reflection-Failed/
+```Plain Text
+publication/
+├── HEDS.pdf                # Full Human Evaluation Datasheet (see below)
 ├── data/
-│   ├── selected_tasks.txt       # List of supported NLG tasks
-│   └── processed/               # Input data files (JSONL format) for each task
-├── src/
-│   ├── Explanation/             # Modules with hallucination detection explanations
-│   │   └── detection/
-│   │       ├── para/            # Paraphrasing task
-│   │       └── d2t/             # D2T task
-│   ├── Self-Reflection/         # Self-reflection-based correction modules
-│   │   └── detection/
-│   │       ├── para/            # Paraphrasing task
-│   │       ├── d2t/             # D2T task (with submodules for different models)
-│   │       └── sum/             # Summarization task
-│   ├── External Annotation/     # External annotation-based correction
-│   │   └── detection/para/
-│   └── Detector/                # Core hallucination detection utilities
-│       └── detection/para/
-└── results/                     # Output files (JSONL format) with generated/corrected texts
+├── eval/
+│   ├── para.py / sum.py / d2t.py
+│   ├── util.py
+│   ├── hallucination.py
+│   ├── judge.py              # CLI: hallucination rates on a JSONL
+│   └── fleiss_kappa.py
+├── methods/
+├── scripts/                  # config, LLM client, JSONL pipeline, run_batch.py
+└── analysis/
 ```
 
-## Key Features
+## Human Evaluation Datasheet
 
-### 1. Text Generation
+`HEDS.pdf` follows the template described in [HEDS 3.0 (Belz and Thomson ,2025)](https://aclanthology.org/2025.gem-1.6/).It archives the complete human‑annotation materials used for selecting hallucination detectors, covering annotator background, full annotation instructions, labelling definitions, and quality‑control protocols\. It computes inter‑annotator agreement \(Fleiss’ Kappa\) via `eval/fleiss_kappa.py` .
 
-- Generates initial outputs for D2T, paraphrasing, and summarization tasks using models like `meta/llama-3.1-8b-instruct`, `qwen2.5` series, and `deepseek-chat`.
-- Handles content safety checks to filter inappropriate content (via `ContentSafetyError`).
+## Hallucination detector selection
 
-### 2. Hallucination Detection
+1. **Samples:** `data/*_sampled_50.jsonl`\.
 
-- Adopt a series of strategies to guide LLM in detecting illusions, ranging from coarse-grained to fine-grained detection methods
-- In External Annotation, DeepSeeker V3 is deployed as a powerful annotator to detect illusions in weaker LLM raw reactions
-- Explanation is the impact of adding explanatory reasoning during the external annotation process.
+2. **Human protocol:** `HEDS.pdf` \(annotators and instructions\)\.
 
-### 3. Text Regeneration
+3. **Human agreement \(optional\):** `eval/fleiss_kappa.py` \.
 
-- Automatically regenerates outputs to fix detected hallucinations.
-- Uses error-specific feedback (e.g., "incorrect member count") to guide correction.
-- Ensures corrected outputs adhere strictly to source data.
-
-## Dependencies
-
-- Python 3.8+
-- `openai` library (for API interactions with language models)
-- JSONL file support (for input/output data)
-
-Install dependencies with:
+4. **LLM evaluation:** same task modules as Part 2\.
 
 ```bash
-pip install openai
+python eval/judge.py --task para \
+  --input-jsonl path/to/outputs.jsonl --output-json rates.json
 ```
 
-## Usage
+## Hallucination detection pipeline
 
-### 1. Configuration
+1. **Data:** `data/{task}_sampled_300.jsonl`\.
 
-- Set up API credentials for your language models:
-  - Update `base_url` and `api_key` in `create_client()`, `create_qwen_client()`, and `create_deepseek_client()` functions (e.g., in `src/Self-Reflection/detection/para/binary.py`).
+2. **Methods:** `methods/*.py`\.
 
-### 2. Input Data
+3. **Batch:** `scripts/run_batch.py`\.
 
-- Prepare input data in JSONL format, where each line contains a JSON object with:
-  - `question`: The generation task/query.
-  - `input`: Source text/data for the task.
-  - `answer`: Reference answer(s) for evaluation.
-
-### 3. Run Tasks
-
-Execute the main script for your target task and model. Example for paraphrasing with binary hallucination detection:
+4. **Power analysis:** `analysis/power_analysis.py`\.
 
 ```bash
-python -u src/Self-Reflection/detection/para/binary.py
+export TASK=d2t RESULT_DIR=results/d2t_run1 RUNS=5
+python scripts/run_batch.py
+python analysis/power_analysis.py
 ```
 
-### 4. Output
+## `scripts/` 
 
-- Results are saved in JSONL format (e.g., `results/Self-Reflection/para/llama/para_llama_binary_300.jsonl`).
-- Each output entry includes:
-  - `input`: Source input.
-  - `question`: Task query.
-  - `initial_answer`: First generated output.
-  - `hallucination`: "yes" or "no" (detection result).
-  - `final_answer`: Corrected output (if hallucination was detected).
-  - `reference_answer`: Ground truth reference.
-  - `reason`: Explanation for hallucination (if applicable).
+|Module|Role|
+|---|---|
+|`config.py`|Environment variables \(API, paths\)|
+|`llm_client.py`|OpenAI‑compatible chat calls|
+|`jsonl_pipeline.py`|JSONL loop used by `methods/`|
+|`logging_config.py`|Logging setup|
+|`run_batch.py`|Run all methods \+ eval rates|
 
-## Notes
+## License
 
-- **Content Safety**: The framework includes `ContentSafetyError` to handle cases where generated content fails safety checks (marked as `[Blocked]`).
-- **Model Compatibility**: Supports multiple models (Llama, Qwen, DeepSeek) – adjust `model` parameter in `call_api()` functions to switch models.
-- **Extensibility**: Add new tasks by extending the detection/regeneration logic (follow the structure of existing task modules).
+\[Apache‑2\.0\]
+
