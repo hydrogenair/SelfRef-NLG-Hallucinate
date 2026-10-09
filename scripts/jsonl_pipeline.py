@@ -1,4 +1,4 @@
-"""Shared JSONL read/write loop for detection methods."""
+
 
 from __future__ import annotations
 

@@ -7,7 +7,7 @@ This repository contains the code for our empirical investigation of **self‑re
 We evaluate **eight hallucination‑detection strategies** spanning coarse‑binary judgment, category annotation, error localisation, scoring, and free‑form feedback, across multiple open‑source and frontier LLMs\. Our experiments show that self‑reflection only yields a limited, inconsistent reduction of hallucination; the primary bottleneck is models' poor self‑diagnosis ability\. Iterative self‑reflection brings negligible further gains\. Using a stronger external annotator can improve factual consistency but weakens the lightweight appeal of self‑reflection\.
 
 > 📄 Paper: Self‑Reflection Often Fails to Address Hallucination in Classical Natural Language Generation Tasks: An Empirical Study
-> 🔗 Code repository: [https://github\.com/xxx/SelfRef](https://github.com/xxx/SelfRef)‑NLG‑Hallucinate
+> 🔗 Code repository: [https://github\.com/hydrogenair/SelfRef‑NLG‑Hallucinate](https://github.com/hydrogenair/SelfRef-NLG-Hallucinate)
 
 ## Directory layout
 
@@ -61,7 +61,7 @@ python scripts/run_batch.py
 python analysis/power_analysis.py
 ```
 
-## `scripts/` 
+## Scripts
 
 |Module|Role|
 |---|---|
